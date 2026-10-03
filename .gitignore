@@ -1,0 +1,14 @@
+obj_dir/
+*.o
+*.a
+*.d
+*.log
+sim_crc32
+sim_crc32_trace
+simv*
+csrc/
+*.daidir/
+ucli.key
+vc_hdrs.h
+vsim.wlf
+*.vpd

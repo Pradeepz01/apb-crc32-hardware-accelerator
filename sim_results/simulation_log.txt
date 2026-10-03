@@ -1,0 +1,122 @@
+-Info: /home/pradeep/System verilog project/miniproject/tb/tb_top.sv:334: $dumpvar ignored, as Verilated without --trace
+==================================================================
+    STARTING APB CRC-32 HARDWARE ACCELERATOR VERIFICATION SUITE   
+==================================================================
+
+--- TEST 1: Register Readout & Default State Verification ---
+[SCOREBOARD PASS] READ ADDR=0x00 DATA=0x0000005c (Match)
+[SCOREBOARD PASS] READ STATUS: 0x00000080 (Flags matched)
+[SCOREBOARD PASS] READ ADDR=0x08 DATA=0x04c11db7 (Match)
+[SCOREBOARD PASS] READ ADDR=0x0c DATA=0xffffffff (Match)
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0x00000000 (Expected=0x00000000)
+[SCOREBOARD PASS] READ ADDR=0x18 DATA=0x00000000 (Match)
+[SCOREBOARD PASS] READ ADDR=0x1c DATA=0x00000000 (Match)
+
+--- TEST 2: IEEE 802.3 Standard Vector (ASCII '123456789') ---
+[DRIVER] WRITE OK: ADDR=0x00 DATA=0x0000005e STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x00 DATA=0x0000005c STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x34333231 STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x38373635 STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x00 DATA=0x0000001c STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x00000039 STRB=0x1
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0xcbf43926 (Expected=0xcbf43926)
+[TEST 2 SUCCESS] Golden Vector '123456789' CRC-32: 0xcbf43926 MATCHED!
+
+--- TEST 3: Castagnoli CRC-32C Polynomial Verification ---
+[DRIVER] WRITE OK: ADDR=0x08 DATA=0x1edc6f41 STRB=0xf
+[SCOREBOARD PASS] READ ADDR=0x08 DATA=0x1edc6f41 (Match)
+[DRIVER] WRITE OK: ADDR=0x00 DATA=0x0000005e STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x00 DATA=0x0000005c STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0xa5a5a5a5 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0x74a3f6e1 (Expected=0x74a3f6e1)
+[DRIVER] WRITE OK: ADDR=0x08 DATA=0x04c11db7 STRB=0xf
+
+--- TEST 4: Wait-State Injection (PREADY = 0 for 3 cycles) ---
+[DRIVER] WRITE OK: ADDR=0x00 DATA=0x0000035c STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x11223344 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0xd3d55e5d (Expected=0xd3d55e5d)
+[DRIVER] WRITE OK: ADDR=0x00 DATA=0x0000005c STRB=0xf
+
+--- TEST 5: Interrupt Enable & W1C Clearing Verification ---
+[DRIVER] WRITE OK: ADDR=0x18 DATA=0x00000003 STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0xcafebabe STRB=0xf
+[SCOREBOARD PASS] READ ADDR=0x1c DATA=0x00000001 (Match)
+[TEST 5 PASS] Interrupt Flag asserted correctly (INT_STAT[0]=1, IRQ=1)
+[DRIVER] WRITE OK: ADDR=0x1c DATA=0x00000001 STRB=0xf
+[SCOREBOARD PASS] READ ADDR=0x1c DATA=0x00000000 (Match)
+[TEST 5 PASS] Interrupt Flag cleared correctly via W1C (INT_STAT[0]=0, IRQ=0)
+
+--- TEST 6: Error Injection (Unaligned, Out-of-bounds, Write to RO) ---
+[SCOREBOARD PASS] Expected error response PSLVERR=1 correctly asserted for READ ADDR=0x02
+[SCOREBOARD PASS] Expected error response PSLVERR=1 correctly asserted for READ ADDR=0x24
+[SCOREBOARD PASS] Expected error response PSLVERR=1 correctly asserted for WRITE ADDR=0x04
+[SCOREBOARD PASS] Expected error response PSLVERR=1 correctly asserted for WRITE ADDR=0x14
+
+--- TEST 7: Back-to-Back Burst Transfers (High Throughput) ---
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x10000000 STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x10000001 STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x10000002 STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x10000003 STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x10000004 STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x10000005 STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x10000006 STRB=0xf
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x10000007 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0x7f9808b5 (Expected=0x7f9808b5)
+
+--- TEST 8: Constrained Random Stimulus Verification ---
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x797673c4 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0x83fde403 (Expected=0x83fde403)
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x9efdd502 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0xdf575b07 (Expected=0xdf575b07)
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x92178378 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0x69967976 (Expected=0x69967976)
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0xcaa49eb6 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0x590b511c (Expected=0x590b511c)
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x7d6ff3b7 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0x5c408264 (Expected=0x5c408264)
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0x6f9e1721 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0xd63d848f (Expected=0xd63d848f)
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0xdf8cafc5 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0x65f7e919 (Expected=0x65f7e919)
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0xa451ff62 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0x91efce0a (Expected=0x91efce0a)
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0xadfbc912 STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0xb0671d3b (Expected=0xb0671d3b)
+[DRIVER] WRITE OK: ADDR=0x10 DATA=0xb4323bfd STRB=0xf
+[SCOREBOARD PASS] *** CRC RESULT MATCH *** ADDR=0x14 Computed CRC=0x8e03399c (Expected=0x8e03399c)
+
+==================================================================
+                   VERIFICATION SCOREBOARD REPORT                 
+==================================================================
+ Total Transactions Checked : 63
+ Total Write Transfers      : 37
+ Total Read Transfers       : 26
+ Protocol Errors Injected   : 4
+ Data & Protocol Matches    : 63
+ Data Mismatches / Errors   : 0
+ STATUS: >>> ALL TEST SCENARIOS PASSED (100% MATCH) <<<
+==================================================================
+
+==================================================================
+                    FUNCTIONAL COVERAGE REPORT                    
+==================================================================
+ Total Coverage Samples Collected : 63
+ Address Space Coverage:
+   - 0x00 (CRC_CTRL)     : 8 hits
+   - 0x04 (CRC_STATUS)   : 2 hits
+   - 0x08 (CRC_POLY)     : 4 hits
+   - 0x0C (CRC_INIT)     : 1 hits
+   - 0x10 (CRC_DATA_IN)  : 24 hits
+   - 0x14 (CRC_RESULT)   : 16 hits
+   - 0x18 (CRC_INT_EN)   : 2 hits
+   - 0x1C (CRC_INT_STAT) : 4 hits
+   - Error Addresses     : 2 hits
+ Protocol Transfer Coverage:
+   - Read Transfers      : 26 hits
+   - Write Transfers     : 37 hits
+   - Error Responses     : 4 hits
+ Functional Coverage Metric       : 100.00 % (Full Register & Protocol Space)
+==================================================================
+
+[TB_TOP] Simulation completed successfully at 2196000 ns.
+- /home/pradeep/System verilog project/miniproject/tb/tb_top.sv:510: Verilog $finish
