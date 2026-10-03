@@ -22,7 +22,7 @@ The APB Slave interface conforms to the canonical 3-state Mealy/Moore hybrid FSM
 
 ## 2. State Transition Diagram
 
-![FSM State Diagram](../docs/images/apb_fsm_state_diagram.png)
+![FSM State Diagram](images/apb_fsm_state_diagram.png)
 
 ```mermaid
 stateDiagram-v2

@@ -120,15 +120,22 @@ miniproject/
 ├── sim_results/                        # Simulation Logs & Waveforms
 │   ├── simulation_log.txt              # Complete simulation execution output (100% pass)
 │   └── crc32_apb.vcd                   # Generated VCD waveform (73 KB)
-├── doc/                                # Detailed Course Technical Specifications
+├── docs/                               # Project Documentation & Specifications
+│   ├── images/                         # Waveforms, schematics, and academic figures
+│   │   ├── anna_univ_logo.png
+│   │   ├── apb_fsm_state_diagram.png
+│   │   ├── edaplayground_waveform_real.png
+│   │   ├── epwave_waveform_verdi.png
+│   │   ├── microarchitecture_block_diagram.png
+│   │   └── simulation_scoreboard_results.png
 │   ├── apb_specification_document.md   # APB protocol compliance & register spec
 │   ├── microarchitecture_spec.md       # Microarchitecture datapath & cell report
 │   ├── fsm_state_diagram.md            # FSM state diagram & transition conditions
 │   └── test_plan.md                    # Verification test plan & coverage matrix
 ├── reports/                            # Formal Course Report
-│   ├── Final_Course_Report.pdf         # Complete 9-page formal academic report (LaTeX typeset PDF)
+│   ├── Final_Course_Report.pdf         # Complete formal academic report (LaTeX typeset PDF)
 │   ├── Final_Course_Report.md          # Comprehensive formal academic project report
-│   └── final_report.tex                # LaTeX publication source code
+│   └── Final_Course_Report.tex         # LaTeX publication source code
 └── presentation/                       # Presentation Materials
     └── PPT_Presentation.md             # 13-slide course presentation deck
 ```
@@ -176,8 +183,8 @@ stat;
 ## 📊 Verification Results Summary
 
 ### 📄 Formal Academic PDF Report
-- **Download / View**: [**`reports/Final_Course_Report.pdf`**](./reports/Final_Course_Report.pdf) (Complete 9-page IEEE/ACM publication-grade report with microarchitecture, mathematical formulation, SVA, synthesis cell breakdown, and waveform traces)
-- **LaTeX Source**: [`reports/final_report.tex`](./reports/final_report.tex)
+- **Download / View**: [**`reports/Final_Course_Report.pdf`**](./reports/Final_Course_Report.pdf) (Complete formal Anna University CEG academic report with microarchitecture, mathematical formulation, SVA, synthesis cell breakdown, and waveform traces)
+- **LaTeX Source**: [`reports/Final_Course_Report.tex`](./reports/Final_Course_Report.tex)
 
 ### 📈 Authentic EDA Playground (EPWave) Simulation Waveform (0 to 1000 ns)
 ![EDA Playground EPWave Waveform](docs/images/edaplayground_waveform_real.png)
