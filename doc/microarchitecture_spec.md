@@ -14,6 +14,8 @@ The accelerator is organized into three decoupled hardware functional blocks:
 2. **Memory-Mapped Register File (`apb_crc32_regfile`)**: Contains all configuration, status, data buffers, and interrupt logic.
 3. **High-Speed Parallel CRC-32 Engine (`crc32_engine`)**: Pure combinational parallel LFSR cascade core with bit-reflection logic and dynamic accumulator register.
 
+![Microarchitecture Block Diagram](../docs/images/microarchitecture_block_diagram.png)
+
 ```
                            +-------------------------------------------------------+
                            |                   apb_crc32_top                       |

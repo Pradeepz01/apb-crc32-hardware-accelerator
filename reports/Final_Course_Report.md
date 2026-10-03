@@ -99,9 +99,14 @@ The memory map occupies a 32-byte region aligned on 4-byte boundaries:
 
 ## 4. Hardware Implementation & RTL Microarchitecture
 
+![Microarchitecture Block Diagram](../docs/images/microarchitecture_block_diagram.png)
+
 The top-level RTL module `apb_crc32_top` cleanly instantiates three dedicated sub-modules:
 
 ### 4.1 APB Slave Handshake FSM (`apb_slave_fsm.sv`)
+
+![APB Protocol FSM State Diagram](../docs/images/apb_fsm_state_diagram.png)
+
 A robust 3-state finite state machine enforces APB protocol compliance:
 - **`IDLE`**: Awaiting `PSEL`.
 - **`SETUP`**: `PSEL` asserted, `PENABLE = 0`. Internal address decoders settle.
@@ -188,6 +193,8 @@ A layered, self-checking SystemVerilog testbench was architected:
 ---
 
 ## 6. Simulation Results & Verification Log Analysis
+
+![Terminal Simulation Output & Scoreboard](../docs/images/simulation_scoreboard_results.png)
 
 The verification suite was simulated using Verilator and Synopsys VCS. All 8 comprehensive test scenarios completed with zero errors.
 
@@ -294,6 +301,12 @@ The verification suite was simulated using Verilator and Synopsys VCS. All 8 com
  Functional Coverage Metric       : 100.00 % (Full Register & Protocol Space)
 ==================================================================
 ```
+
+### 6.2 Timing Waveform Analysis (Synopsys VCS / Verdi / EPWave)
+
+The simulation waveform captures key protocol phases including idle states, address setup, wait-state handshake stretching (`PREADY = 0` for 3 cycles), single-cycle write commits, and error response trapping (`PSLVERR = 1`):
+
+![Synopsys VCS / Verdi / EPWave Timing Waveform](../docs/images/epwave_waveform_verdi.png)
 
 ---
 

@@ -41,6 +41,8 @@
 ## Slide 3: System Architecture & Block Diagram
 ### Modular 3-Tier Hardware Architecture
 
+![Microarchitecture Block Diagram](../docs/images/microarchitecture_block_diagram.png)
+
 ```
                           apb_crc32_top
                +----------------------------------+
@@ -74,6 +76,9 @@ APB Master     |   apb_slave_fsm                  |
 
 ## Slide 4: AMBA APB Slave FSM & Protocol Handshaking
 ### Rigorous APB3 / APB4 Protocol Compliance
+
+![APB FSM State Diagram](../docs/images/apb_fsm_state_diagram.png)
+
 - **3-State FSM**: `IDLE` $\rightarrow$ `SETUP` $\rightarrow$ `ACCESS`.
 - **Dynamic Wait-State Injection (`PREADY`)**:
   - Programmable from 0 to 15 wait cycles via `CRC_CTRL[11:8]`.
@@ -191,6 +196,8 @@ APB Master     |   apb_slave_fsm                  |
 ## Slide 10: Scoreboard & Functional Coverage Results
 ### Flawless 100% Verification Metrics
 
+![Simulation Scoreboard Output](../docs/images/simulation_scoreboard_results.png)
+
 ```
 ==================================================================
                    VERIFICATION SCOREBOARD REPORT                 
@@ -238,6 +245,9 @@ APB Master     |   apb_slave_fsm                  |
 
 ## Slide 12: EDA Playground & VCS Integration
 ### Ready-to-Run Demonstration Environment
+
+![Synopsys VCS / Verdi / EPWave Timing Waveform](../docs/images/epwave_waveform_verdi.png)
+
 - **Complete Self-Contained Bundle**:
   - `design.sv`: Concatenated synthesizable package and RTL modules.
   - `testbench.sv`: Complete layered testbench with EPWave waveform dumping.

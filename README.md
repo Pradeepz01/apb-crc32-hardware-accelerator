@@ -40,6 +40,8 @@ The subsystem is engineered for high-performance Systems-on-Chip (SoCs) to offlo
 
 ## 🏛 Subsystem Architecture
 
+![Subsystem Architecture](docs/images/microarchitecture_block_diagram.png)
+
 ```
                           apb_crc32_top
                +----------------------------------+
@@ -65,6 +67,9 @@ APB Master     |   apb_slave_fsm                  |
                |   - RefIn / RefOut / XOROut      |
                +----------------------------------+
 ```
+
+### 🔄 APB Protocol Finite State Machine
+![APB FSM State Diagram](docs/images/apb_fsm_state_diagram.png)
 
 ---
 
@@ -164,6 +169,12 @@ stat;
 ---
 
 ## 📊 Verification Results Summary
+
+### 🖥 Simulation Execution & Scoreboard Terminal Output
+![Simulation Scoreboard Results](docs/images/simulation_scoreboard_results.png)
+
+### 📈 Synopsys VCS / Verdi / EPWave Timing Waveform
+![EPWave Verdi Waveform](docs/images/epwave_waveform_verdi.png)
 
 ### Test Execution Matrix
 | Test ID | Test Scenario | Verified Functionality | Status |
