@@ -123,7 +123,9 @@ miniproject/
 │   ├── fsm_state_diagram.md            # FSM state diagram & transition conditions
 │   └── test_plan.md                    # Verification test plan & coverage matrix
 ├── reports/                            # Formal Course Report
-│   └── Final_Course_Report.md          # Comprehensive formal academic project report
+│   ├── Final_Course_Report.pdf         # Complete 9-page formal academic report (LaTeX typeset PDF)
+│   ├── Final_Course_Report.md          # Comprehensive formal academic project report
+│   └── final_report.tex                # LaTeX publication source code
 └── presentation/                       # Presentation Materials
     └── PPT_Presentation.md             # 13-slide course presentation deck
 ```
@@ -170,11 +172,18 @@ stat;
 
 ## 📊 Verification Results Summary
 
+### 📄 Formal Academic PDF Report
+- **Download / View**: [**`reports/Final_Course_Report.pdf`**](./reports/Final_Course_Report.pdf) (Complete 9-page IEEE/ACM publication-grade report with microarchitecture, mathematical formulation, SVA, synthesis cell breakdown, and waveform traces)
+- **LaTeX Source**: [`reports/final_report.tex`](./reports/final_report.tex)
+
+### 📈 Authentic EDA Playground (EPWave) Simulation Waveform (0 to 1000 ns)
+![EDA Playground EPWave Waveform](docs/images/edaplayground_waveform_real.png)
+
+### 🔍 Synopsys VCS / Verdi / EPWave Timing Waveform Detail
+![EPWave Verdi Waveform](docs/images/epwave_waveform_verdi.png)
+
 ### 🖥 Simulation Execution & Scoreboard Terminal Output
 ![Simulation Scoreboard Results](docs/images/simulation_scoreboard_results.png)
-
-### 📈 Synopsys VCS / Verdi / EPWave Timing Waveform
-![EPWave Verdi Waveform](docs/images/epwave_waveform_verdi.png)
 
 ### Test Execution Matrix
 | Test ID | Test Scenario | Verified Functionality | Status |

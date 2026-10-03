@@ -302,10 +302,14 @@ The verification suite was simulated using Verilator and Synopsys VCS. All 8 com
 ==================================================================
 ```
 
-### 6.2 Timing Waveform Analysis (Synopsys VCS / Verdi / EPWave)
+### 6.2 Timing Waveform Analysis (EDA Playground EPWave & Synopsys VCS / Verdi)
 
-The simulation waveform captures key protocol phases including idle states, address setup, wait-state handshake stretching (`PREADY = 0` for 3 cycles), single-cycle write commits, and error response trapping (`PSLVERR = 1`):
+#### Authentic EDA Playground EPWave Simulation Trace (0 to 1000 ns)
+The simulation waveform captures key protocol phases including power-on reset, register configuration walk, data streaming with single-cycle LFSR accumulation, wait-state handshake stretching (`PREADY = 0` for 3 cycles), and error trapping (`PSLVERR = 1`):
 
+![Authentic EDA Playground EPWave Waveform](../docs/images/edaplayground_waveform_real.png)
+
+#### Detailed Bus Timing & Wait-State / Error Inspection
 ![Synopsys VCS / Verdi / EPWave Timing Waveform](../docs/images/epwave_waveform_verdi.png)
 
 ---

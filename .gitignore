@@ -13,3 +13,8 @@ vc_hdrs.h
 vsim.wlf
 *.vpd
 dump.vcd
+*.aux
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
