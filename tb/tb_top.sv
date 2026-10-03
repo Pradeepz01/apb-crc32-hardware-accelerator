@@ -81,20 +81,20 @@ module tb_top;
   bit        model_ready;
 
   // Bit reversal helper functions
-  function bit [7:0] ref_byte(bit [7:0] in);
+  function automatic bit [7:0] ref_byte(bit [7:0] in);
     bit [7:0] out;
     for (int i = 0; i < 8; i++) out[i] = in[7 - i];
     return out;
   endfunction
 
-  function bit [31:0] ref_word(bit [31:0] in);
+  function automatic bit [31:0] ref_word(bit [31:0] in);
     bit [31:0] out;
     for (int i = 0; i < 32; i++) out[i] = in[31 - i];
     return out;
   endfunction
 
   // Single-byte model step
-  function bit [31:0] step_crc8_model(bit [31:0] cur, bit [7:0] b, bit [31:0] poly);
+  function automatic bit [31:0] step_crc8_model(bit [31:0] cur, bit [7:0] b, bit [31:0] poly);
     bit [31:0] c;
     c = cur ^ {b, 24'h0};
     for (int i = 0; i < 8; i++) begin
@@ -105,7 +105,7 @@ module tb_top;
   endfunction
 
   // Expected CRC calculation
-  function bit [31:0] get_expected_crc();
+  function automatic bit [31:0] get_expected_crc();
     bit [31:0] res;
     res = model_ctrl[CTRL_REFOUT_BIT] ? ref_word(model_accum) : model_accum;
     if (model_ctrl[CTRL_XOROUT_EN_BIT]) res = res ^ 32'hFFFFFFFF;
@@ -115,7 +115,7 @@ module tb_top;
   // --------------------------------------------------------------------------
   // APB Master BFM Driver Tasks
   // --------------------------------------------------------------------------
-  task apb_write(
+  task automatic apb_write(
     input bit [7:0]  addr,
     input bit [31:0] data,
     input bit [3:0]  strb = 4'hF,
@@ -225,7 +225,7 @@ module tb_top;
     pwrite  = 1'b0;
   endtask
 
-  task apb_read(
+  task automatic apb_read(
     input  bit [7:0]  addr,
     output bit [31:0] data,
     input  bit        expect_err = 1'b0
@@ -455,13 +455,17 @@ module tb_top;
     // TEST 8: Constrained Random Transfers
     // ========================================================================
     $display("\n--- TEST 8: Constrained Random Stimulus Verification ---");
-    for (int i = 0; i < 20; i++) begin
-      bit [7:0]  rand_addr = (i % 2 == 0) ? ADDR_CRC_DATA_IN : ADDR_CRC_RESULT;
-      bit [31:0] rand_data = $random;
-      if (rand_addr == ADDR_CRC_DATA_IN) begin
-        apb_write(rand_addr, rand_data, 4'hF);
-      end else begin
-        apb_read(rand_addr, read_val);
+    begin
+      automatic bit [7:0]  rand_addr;
+      automatic bit [31:0] rand_data;
+      for (int i = 0; i < 20; i++) begin
+        rand_addr = (i % 2 == 0) ? ADDR_CRC_DATA_IN : ADDR_CRC_RESULT;
+        rand_data = $random;
+        if (rand_addr == ADDR_CRC_DATA_IN) begin
+          apb_write(rand_addr, rand_data, 4'hF);
+        end else begin
+          apb_read(rand_addr, read_val);
+        end
       end
     end
 

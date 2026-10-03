@@ -12,3 +12,4 @@ ucli.key
 vc_hdrs.h
 vsim.wlf
 *.vpd
+dump.vcd
