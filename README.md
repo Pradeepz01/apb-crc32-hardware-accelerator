@@ -15,10 +15,13 @@ This repository contains the complete synthesizable RTL design, SystemVerilog la
 
 The subsystem is engineered for high-performance Systems-on-Chip (SoCs) to offload Cyclic Redundancy Check (CRC) operations from host processors for Ethernet (IEEE 802.3), storage (iSCSI, Btrfs), and automotive communications.
 
-### 👥 Team 7 Members
-- **Pradeep** - Lead RTL Design & Verification Engineer
-- **Bhuvanesh S** - Architecture & Protocol Specification
-- **Aathithya K** - Verification Environment & Coverage Analysis
+### 👥 Team Members
+- **PRADEEP S** (Roll No: 2023195505)
+- **BHUVANESH S** (Roll No: 2023105039)
+- **AATHITYA K** (Roll No: 2023105060)
+- **Course**: EC23E34 Design and Verification using SystemVerilog
+- **Department**: Department of Electronics and Communication Engineering
+- **Institution**: College of Engineering, Guindy, Anna University: Chennai 600025
 
 ---
 

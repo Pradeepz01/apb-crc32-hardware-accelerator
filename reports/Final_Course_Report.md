@@ -1,12 +1,13 @@
 # Comprehensive Final Course Report
 ## Design and Verification of an AMBA APB-Compliant Configurable CRC-32 Hardware Accelerator Subsystem
 
-**Course**: Advanced SystemVerilog Design and Verification  
-**Academic Term**: Fall 2026  
-**Team 7**:  
-- **Pradeep** (Lead RTL Design & Verification Engineer)  
-- **Bhuvanesh S** (Architecture & Protocol Specification)  
-- **Aathithya K** (Verification Environment & Coverage Analysis)  
+**Course**: EC23E34 Design and Verification using SystemVerilog  
+**Institution**: Department of Electronics and Communication Engineering, College of Engineering, Guindy, Anna University: Chennai 600025  
+**Academic Term**: October 2026  
+**Team**:  
+- **PRADEEP S** -- 2023195505  
+- **BHUVANESH S** -- 2023105039  
+- **AATHITYA K** -- 2023105060  
 
 ---
 

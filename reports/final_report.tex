@@ -6,7 +6,7 @@
 \usepackage[scaled=0.88]{inconsolata} % Clean, modern monospace font
 \usepackage{microtype} % Subtle typographic micro-adjustments
 \usepackage{setspace}
-\setstretch{1.12}
+\setstretch{1.14}
 
 % --- Core Packages ---
 \usepackage{amsmath,amssymb}
@@ -21,6 +21,7 @@
 \usepackage{subcaption}
 \usepackage{listings}
 \usepackage{lastpage}
+\usepackage{tikz} % For authentic Anna University cover page border
 \usepackage{hyperref}
 
 % --- Color Palette (No AI-slop: Formal Academic Monochrome & Subtle Accents) ---
@@ -51,15 +52,12 @@
 \titlespacing*{\subsection}{0pt}{10pt plus 2pt minus 2pt}{4pt}
 \titlespacing*{\subsubsection}{0pt}{8pt plus 1pt minus 1pt}{3pt}
 
-% --- Header & Footer Configuration ---
+% --- Header & Footer Configuration (No headers, only bottom page number as requested) ---
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small\scshape AMBA APB-Compliant CRC-32 Hardware Accelerator}
-\fancyhead[R]{\small\scshape Technical Course Report}
-\fancyfoot[L]{\small\color{gray} Team 7: Bhuvanesh S, Aathithya K, Pradeep}
-\fancyfoot[R]{\small\color{gray} Page \thepage\ of \pageref{LastPage}}
-\renewcommand{\headrulewidth}{0.4pt}
-\renewcommand{\footrulewidth}{0.4pt}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyfoot[C]{\small\thepage}
 
 % --- Code Listing Styling ---
 \lstset{
@@ -76,25 +74,81 @@
     showstringspaces=false
 }
 
-% --- Document Metadata ---
-\title{
-  \vspace{-1.5cm}
-  {\Large\bfseries Design and Verification of an AMBA APB-Compliant\\Configurable CRC-32 Hardware Accelerator Subsystem}\\[0.3cm]
-  {\normalsize Advanced SystemVerilog Design and Verification --- Formal Academic Project Report}
-}
-
-\author{
-  \textbf{Pradeep} \textit{(Lead RTL Design \& Verification Engineer)}\\
-  \textbf{Bhuvanesh S} \textit{(Architecture \& Protocol Specification)}\\
-  \textbf{Aathithya K} \textit{(Verification Environment \& Coverage Analysis)}\\[0.2cm]
-  \textit{Department of Electronics and Communication Engineering}
-}
-\date{Fall Academic Term 2026}
-
 \begin{document}
 
-\maketitle
-\thispagestyle{fancy}
+% =========================================================================
+% ANNA UNIVERSITY / COLLEGE OF ENGINEERING, GUINDY - COVER PAGE TEMPLATE
+% =========================================================================
+\begin{titlepage}
+% Draw Anna University standard double-border frame
+\begin{tikzpicture}[remember picture,overlay]
+    \draw[line width=1.5pt] ([shift={(12mm,-12mm)}]current page.north west) 
+        rectangle ([shift={(-12mm,12mm)}]current page.south east);
+    \draw[line width=0.6pt] ([shift={(13.5mm,-13.5mm)}]current page.north west) 
+        rectangle ([shift={(-13.5mm,13.5mm)}]current page.south east);
+\end{tikzpicture}
+
+\centering
+\vspace*{0.2cm}
+
+{\Large \textbf{DESIGN AND VERIFICATION OF AN AMBA APB-COMPLIANT\\CONFIGURABLE CRC-32 HARDWARE ACCELERATOR\\SUBSYSTEM}\par}
+
+\vspace{1.0cm}
+
+{\large \textbf{MINI PROJECT REPORT}\par}
+
+\vspace{0.8cm}
+
+{\normalsize \textit{Submitted by}\par}
+
+\vspace{0.4cm}
+
+{\large \textbf{PRADEEP S -- 2023195505}\par}
+\vspace{0.2cm}
+{\large \textbf{BHUVANESH S -- 2023105039}\par}
+\vspace{0.2cm}
+{\large \textbf{AATHITYA K -- 2023105060}\par}
+
+\vspace{0.8cm}
+
+{\normalsize \textit{for the course}\par}
+\vspace{0.2cm}
+{\large \textbf{EC23E34 DESIGN AND VERIFICATION USING SYSTEMVERILOG}\par}
+
+\vspace{0.6cm}
+
+{\normalsize \textit{in partial fulfilment for the award of the degree of}\par}
+\vspace{0.3cm}
+{\large \textbf{BACHELOR OF ENGINEERING}\par}
+\vspace{0.15cm}
+{\normalsize \textit{in}\par}
+\vspace{0.15cm}
+{\large \textbf{ELECTRONICS AND COMMUNICATION ENGINEERING}\par}
+
+\vspace{0.8cm}
+
+% Anna University Official Emblem
+\includegraphics[width=3.2cm]{../docs/images/anna_univ_logo.png}\par
+
+\vspace{0.8cm}
+
+{\large \textbf{DEPARTMENT OF ELECTRONICS AND COMMUNICATION ENGINEERING}\par}
+\vspace{0.15cm}
+{\large \textbf{COLLEGE OF ENGINEERING, GUINDY}\par}
+\vspace{0.15cm}
+{\large \textbf{ANNA UNIVERSITY: CHENNAI 600025}\par}
+
+\vspace{0.8cm}
+
+{\large \textbf{OCTOBER 2026}\par}
+
+\end{titlepage}
+
+% =========================================================================
+% MAIN REPORT BODY
+% =========================================================================
+\pagenumbering{arabic}
+\setcounter{page}{1}
 
 \begin{abstract}
 \noindent Data integrity verification is a foundational requirement across high-speed packet networks, non-volatile storage controllers, and safety-critical automotive protocols. Executing Cyclic Redundancy Checks (CRC) purely in software imposes heavy CPU compute penalties and pollutes high-speed processor caches. This report details the complete register-transfer level (RTL) design, synthesis, and constrained-random SystemVerilog verification of a fully synthesizable \textbf{AMBA\textsuperscript{\textregistered} APB-compliant Configurable CRC-32 Hardware Accelerator}. The accelerator core utilizes a 4-byte parallel combinational Linear Feedback Shift Register (LFSR) network capable of processing 32 bits per clock cycle, achieving peak throughput exceeding \textbf{3.2 Gbps at 100 MHz}. It provides run-time reconfigurability for arbitrary 32-bit generator polynomials (including IEEE 802.3 Ethernet, Castagnoli CRC-32C, and Koopman), configurable input/output bit reflection, byte-lane strobe masking, hardware wait-state injection (\texttt{PREADY}), and protocol bus error trapping (\texttt{PSLVERR}). 
