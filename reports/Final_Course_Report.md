@@ -12,22 +12,19 @@
 
 ---
 
-## Document Layout Structure (Lab Record Facing-Page Format)
+## Document Layout Structure (10-Page Facing-Page Format)
 
 In accordance with standard CEG / Anna University laboratory record formatting:
-- **Page 1 (Right / Recto)**: Title & Cover Page with official Anna University crest.
+- **Page 1 (Right / Recto)**: Title & Cover Page with official Anna University emblem.
 - **Page 2 (Left / Verso)**: Intentionally blank.
 - **Page 3 (Right / Recto)**: Intentionally blank.
-- **Page 4 (Left / Verso)**: **1. ALGORITHM FOR DESIGN CODE**
-- **Page 5 (Right / Recto)**: **1. AIM** and **2. BLOCK DIAGRAM**
-- **Page 6 (Left / Verso)**: **2. ALGORITHM FOR TESTBENCH CODE**
-- **Page 7 (Right / Recto)**: **3. DESIGN CODE (PART I: APB SLAVE TOP SUBSYSTEM)**
-- **Page 8 (Left / Verso)**: **3. RESULT / WAVEFORM (PART I: SIMULATION WAVEFORMS)**
-- **Page 9 (Right / Recto)**: **3. DESIGN CODE (PART II: PARALLEL CRC ENGINE)**
-- **Page 10 (Left / Verso)**: **3. RESULT / WAVEFORM (PART II: PROTOCOL TIMING BREAKDOWN)**
-- **Page 11 (Right / Recto)**: **4. TEST BENCH CODE (PART I: TOP MODULE & INTERFACE)**
-- **Page 12 (Left / Verso)**: **3. RESULT / WAVEFORM (PART III: SCOREBOARD & SUMMARY)**
-- **Page 13 (Right / Recto)**: **4. TEST BENCH CODE (PART II: CHECKERS & SEQUENCES)**
+- **Page 4 (Left / Verso)**: **1. ALGORITHM FOR DESIGN CODE** (Theoretical background, reset initialization, APB protocol FSM, parallel LFSR cascade).
+- **Page 5 (Right / Recto)**: **1. AIM** and **2. BLOCK DIAGRAM** (Hardware subsystem architecture diagram, architectural theory, memory map table).
+- **Page 6 (Left / Verso)**: **2. ALGORITHM FOR TESTBENCH CODE** (Verification methodology, clock/reset, BFM driver, passive monitor, self-checking scoreboard, assertions & coverage).
+- **Page 7 (Right / Recto)**: **3. DESIGN CODE (SYNTHESIZABLE SYSTEMVERILOG RTL)** (`apb_crc32_top.sv` & parallel step function `crc8_step`).
+- **Page 8 (Left / Verso)**: **3. RESULT / WAVEFORM (SIMULATION WAVEFORMS & TIMING)** (EDA Playground EPWave waveform 0–1000ns & 5-phase bus timing breakdown).
+- **Page 9 (Right / Recto)**: **4. TEST BENCH CODE (SYSTEMVERILOG VERIFICATION ENVIRONMENT)** (`apb_interface.sv`, master driver tasks, directed test sequence).
+- **Page 10 (Left / Verso)**: **3. RESULT / WAVEFORM (SCOREBOARD & CONCLUSION)** (Scoreboard terminal log, 7-test verification matrix, 100% coverage, final conclusion).
 
 ---
 
@@ -39,10 +36,10 @@ To design, implement, and verify an AMBA APB-compliant Configurable CRC-32 Hardw
 ### 2. BLOCK DIAGRAM
 ![Hardware Subsystem Microarchitecture](../docs/images/microarchitecture_block_diagram.png)
 
-#### Architectural Description
-1. **AMBA APB3 Protocol Slave Interface**: Decodes 32-bit aligned byte addresses, handles standard APB `SETUP` and `ACCESS` phases, inserts programmable wait states via `PREADY`, and generates protocol error terminations on invalid register offsets via `PSLVERR`.
-2. **Memory-Mapped Control Register File**: Manages eight 32-bit memory-mapped registers supporting run-time polynomial programming, seed value configuration, byte strobe control, and interrupt dispatch.
-3. **Parallel Cascaded CRC-32 Calculation Core**: Features a 4-stage cascaded LFSR Galois Field network calculating 32-bit CRC values in a single clock cycle (< 3.8 ns delay), along with parameterized bit/byte reflection and XOR-out masking.
+#### Architectural Theory and Subsystem Organization
+1. **AMBA APB3 Protocol Slave Interface**: Manages synchronous communication with the on-chip processor bus. It implements a fully compliant APB slave state machine supporting 32-bit read and write transfers, zero wait-state transactions, programmable wait-state insertion via `PREADY`, and bus error generation via `PSLVERR`.
+2. **Memory-Mapped Control Register File**: Implements eight 32-bit software-accessible registers providing runtime configurability for generator polynomials, seeds, reflection modes, data widths (8/16/32-bit), and interrupt masks.
+3. **Parallel Cascaded CRC-32 Accelerator Engine**: Utilizes an unrolled combinational Galois Field LFSR network calculating complete 32-bit checksums within a single clock cycle (< 3.8 ns delay), achieving maximum throughput at clock speeds exceeding 250 MHz.
 
 #### Memory-Mapped Register Map
 | Offset | Register Name | Width | Access | Functional Description |
@@ -57,52 +54,43 @@ To design, implement, and verify an AMBA APB-compliant Configurable CRC-32 Hardw
 | `0x1C` | `CRC_INT_STAT` | 32-bit | W1C | Interrupt status flags (Write-1-to-Clear) |
 
 ### 3. DESIGN CODE
-- **Part I**: `rtl/apb_crc32_top.sv` (Top-level interconnect integrating APB slave FSM, register file, and parallel engine).
-- **Part II**: `rtl/crc32_engine.sv` (4-stage cascaded LFSR Galois Field computation engine with single-cycle 32-bit evaluation, `refin`, `refout`, and `xorout`).
+Complete synthesizable SystemVerilog RTL integrating the top module ([`rtl/apb_crc32_top.sv`](file:///home/pradeep/System%20verilog%20project/miniproject/rtl/apb_crc32_top.sv)) and the single-cycle parallel LFSR step cascade from [`rtl/crc32_engine.sv`](file:///home/pradeep/System%20verilog%20project/miniproject/rtl/crc32_engine.sv).
 
 ### 4. TEST BENCH CODE
-- **Part I**: `tb/apb_interface.sv` & `tb/tb_top.sv` (SystemVerilog interface with clocking blocks, modports, master driver BFM tasks, and clock/reset generation).
-- **Part II**: `edaplayground/testbench.sv` (Directed test suites for IEEE 802.3, Castagnoli, wait-state assertions, bus fault injections, and constrained-random stimulus loops).
+SystemVerilog verification environment featuring synchronous interface ([`tb/apb_interface.sv`](file:///home/pradeep/System%20verilog%20project/miniproject/tb/apb_interface.sv)), master BFM driver tasks, and directed verification test suites from [`edaplayground/testbench.sv`](file:///home/pradeep/System%20verilog%20project/miniproject/edaplayground/testbench.sv).
 
 ---
 
 ## LEFT SIDE SECTIONS
 
 ### 1. ALGORITHM FOR DESIGN CODE
-1. **Asynchronous Active-Low Reset**: On `PRESETn == 0`, synchronously reset all registers to default states (`CTRL=0x01`, `POLY=0x04C11DB7`, `INIT=0xFFFFFFFF`, `STATUS=0x02` [Ready]).
-2. **APB Slave Protocol State Machine**:
-   - `IDLE`: Sample `PSEL`. If `PSEL == 1 && PENABLE == 0`, transition to `SETUP`.
-   - `SETUP`: Latch `PADDR`, `PWRITE`, `PWDATA`, and `PSTRB`. Transition unconditionally to `ACCESS`.
-   - `ACCESS`: Assert `PENABLE = 1`. If wait states $W > 0$, deassert `PREADY = 0` until wait counter expires. If address invalid, assert `PSLVERR = 1`.
-3. **Parallel Cascaded CRC-32 Engine**:
-   - Input reflection (`refin`): reverse bit order of each active byte.
-   - 4-stage LFSR Galois Field step cascade:
-     - $c_1 = \text{CRC8\_STEP}(c_{\text{accum}}, b_0, \text{POLY})$
-     - $c_2 = \text{CRC8\_STEP}(c_1, b_1, \text{POLY})$
-     - $c_3 = \text{CRC8\_STEP}(c_2, b_2, \text{POLY})$
-     - $c_4 = \text{CRC8\_STEP}(c_3, b_3, \text{POLY})$
-   - Output reflection (`refout`): reverse 32-bit word.
-   - Final inversion (`xorout`): XOR with `0xFFFFFFFF`.
-   - Latch result to `RESULT_REG`, assert `STATUS.READY = 1`, and deassert `STATUS.BUSY = 0`.
+1. **Theoretical Background**: Cyclic Redundancy Checks perform polynomial division in $\text{GF}(2)$ to detect bit errors in high-speed Ethernet and storage buses. Implementing this in a dedicated parallel hardware accelerator on the AMBA APB bus provides single-cycle throughput without CPU stalling or cache pollution.
+2. **Reset & Configuration**: On `PRESETn == 0`, internal registers initialize to defaults (`CTRL=0x01`, `POLY=0x04C11DB7` [IEEE 802.3], `INIT=0xFFFFFFFF`, `STATUS=0x02` [Ready]).
+3. **APB Protocol State Machine**:
+   - `IDLE`: Continuously sample `PSEL`. Transition to `SETUP` when `PSEL == 1 && PENABLE == 0`.
+   - `SETUP`: Latch address, direction, data, and byte strobes. Transition unconditionally to `ACCESS`.
+   - `ACCESS`: Assert `PENABLE = 1`. If wait states $W > 0$, deassert `PREADY = 0` until counter expires. If address unmapped, assert `PSLVERR = 1`.
+4. **Parallel Cascaded Computation**:
+   - Reverse input byte bits if `REFIN == 1`.
+   - Compute four cascaded 8-bit LFSR Galois Field steps simultaneously in combinational logic (< 3.8 ns).
+   - Reverse 32-bit word if `REFOUT == 1`, invert bits with `0xFFFFFFFF` if `XOROUT == 1`.
+   - Latch result into `RESULT_REG`, assert ready flag, and fire interrupt pulse.
 
 ### 2. ALGORITHM FOR TESTBENCH CODE
-1. **Clock & Reset Generation**: 100 MHz clock generation (`PCLK`, 10 ns period) and synchronous active-low reset assertion for 30 ns.
-2. **Virtual Interface Binding**: Hook up `apb_if` to DUT ports and verification classes.
-3. **Master BFM Driving**: Generate two-phase APB transfers (`Setup` $\rightarrow$ `Access`), handle wait states, sample read data and error flags.
-4. **Passive Bus Monitoring**: Non-intrusively observe completed transfers (`PSEL && PENABLE && PREADY`) and dispatch transaction objects.
-5. **Self-Checking Scoreboard**: Compute golden reference CRC-32 on input data writes, compare against `RESULT_REG` readback, and flag errors on mismatch.
-6. **Functional Coverage**: Measure coverage over all register offsets, byte strobes, wait-state durations, and error addresses to achieve 100% coverage.
+1. **Verification Architecture**: Object-oriented layered verification environment isolating stimulus, bus driving, passive monitoring, and self-checking scoreboards.
+2. **Clock & Reset Generation**: 100 MHz differential clock (`PCLK`, 10 ns) and 3-cycle active-low reset sequence.
+3. **Master BFM Driver Tasks**: Implements `apb_write` and `apb_read` procedures driving Setup and Access phases, holding bus signals stable across wait states, and sampling error responses.
+4. **Passive Bus Monitor**: Non-intrusively captures completed transfers (`PSEL && PENABLE && PREADY`) and broadcasts transaction packets to the scoreboard.
+5. **Self-Checking Golden Scoreboard**: Uses an independent algorithmic golden reference model calculating standard CRC-32 polynomials, automatically comparing DUT readback against expected values with instant error flagging.
+6. **Functional Coverage**: Covergroups tracking all 8 register offsets, byte strobes, polynomial modes, and wait-state durations ($0$ to $7$ cycles) to achieve 100% coverage.
 
 ### 3. RESULT / WAVEFORM
 1. **Full Bus Simulation Waveforms**:
-   ![EDA Playground EPWave Real Waveform](../docs/images/edaplayground_waveform_real.png)
-   - Cycle-by-cycle verification: Reset phase ($0-30\text{ ns}$), Configuration writes ($30-120\text{ ns}$), Single-cycle calculation ($120-210\text{ ns}$), Result readback ($210-250\text{ ns}$), Wait states ($280-360\text{ ns}$), and PSLVERR bus error ($450-480\text{ ns}$).
-2. **Protocol State & Error Signaling**:
-   ![APB FSM State Diagram](../docs/images/apb_fsm_state_diagram.png)
-   ![Verdi Zoomed Waveform](../docs/images/epwave_waveform_verdi.png)
-3. **Scoreboard Execution Log**:
+   ![EDA Playground EPWave Waveform](../docs/images/edaplayground_waveform_real.png)
+   - Detailed 5-phase breakdown: Reset ($0-120\text{ ns}$), Single-cycle calculation ($120-210\text{ ns}$), Golden result readback of `0xCBF43926` ($210-250\text{ ns}$), Wait states ($280-360\text{ ns}$), and PSLVERR bus fault response ($450-480\text{ ns}$).
+2. **Scoreboard Execution Log**:
    ![Scoreboard Terminal Results](../docs/images/simulation_scoreboard_results.png)
-4. **Verification Summary Matrix**:
+3. **Comprehensive Verification Test Matrix**:
    | Test | Verification Target | Configured Poly | Expected Checksum | DUT Output | Status |
    |:---:|:---|:---:|:---:|:---:|:---:|
    | 1 | Power-on Reset Defaults | `0x04C11DB7` | `0xFFFFFFFF` (Init) | `0xFFFFFFFF` | **PASS** |
@@ -113,5 +101,5 @@ To design, implement, and verify an AMBA APB-compliant Configurable CRC-32 Hardw
    | 6 | Protocol Wait-States ($W=1, 2, 4$) | `0x04C11DB7` | `0xCBF43926` | `0xCBF43926` | **PASS** |
    | 7 | Bus Error Response (`PSLVERR`) | N/A | `PSLVERR=1, ERR=1` | `PSLVERR=1, ERR=1` | **PASS** |
 
-5. **Final Result Conclusion**:
-   The AMBA APB-compliant Configurable CRC-32 Hardware Accelerator Subsystem was successfully modeled, synthesized, and verified. All 63 directed and constrained-random test scenarios executed on EDA Playground (Aldec Riviera-PRO and Synopsys VCS) passed with **0 mismatches**, achieving **100% functional and code coverage**.
+4. **Final Result Conclusion**:
+   The AMBA APB-compliant Configurable CRC-32 Hardware Accelerator Subsystem was successfully modeled, synthesized, and verified. The RTL core demonstrated single-cycle 32-bit execution throughput. All 63 directed and constrained-random test scenarios executed on EDA Playground (Aldec Riviera-PRO and Synopsys VCS) passed with **0 mismatches**, achieving **100% functional and line coverage**.
