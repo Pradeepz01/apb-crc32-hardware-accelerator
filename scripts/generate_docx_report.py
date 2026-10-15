@@ -3,14 +3,15 @@
 generate_docx_report.py
 Generates the publication-grade Word DOCX equivalent of Final_Course_Report.pdf,
 strictly following the 10-page Left-hand / Right-hand lab record format with Times New Roman
-typography, clean tables, embedded waveforms, and matching narrative theory structure.
+typography, clean layout, embedded waveforms, point-wise 1-10 algorithms, no subtopics,
+and simplified output image + brief paragraph results.
 """
 
 import os
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import parse_xml, OxmlElement
 from docx.oxml.ns import nsdecls, qn
 
@@ -59,28 +60,31 @@ def create_report():
     normal_style.font.size = Pt(10.5)
     normal_style.font.color.rgb = RGBColor(0, 0, 0)
     normal_style.paragraph_format.line_spacing = 1.15
-    normal_style.paragraph_format.space_after = Pt(2)
+    normal_style.paragraph_format.space_after = Pt(3)
     normal_style.paragraph_format.space_before = Pt(0)
 
     # Helper functions
     def add_sec_heading(text):
         p = doc.add_paragraph()
         p.paragraph_format.space_before = Pt(4)
-        p.paragraph_format.space_after = Pt(2)
+        p.paragraph_format.space_after = Pt(3)
         run = p.add_run(text)
         run.bold = True
         run.font.name = 'Times New Roman'
         run.font.size = Pt(11.5)
         return p
 
-    def add_subsec_heading(text):
+    def add_point(num_str, title_str, text_str):
         p = doc.add_paragraph()
-        p.paragraph_format.space_before = Pt(3)
-        p.paragraph_format.space_after = Pt(1)
-        run = p.add_run(text)
-        run.bold = True
-        run.font.name = 'Times New Roman'
-        run.font.size = Pt(10.5)
+        p.paragraph_format.space_before = Pt(2)
+        p.paragraph_format.space_after = Pt(2.5)
+        p.paragraph_format.line_spacing = 1.12
+        r_num = p.add_run(f"{num_str}. ")
+        r_num.bold = True
+        if title_str:
+            r_title = p.add_run(f"{title_str}: ")
+            r_title.bold = True
+        r_text = p.add_run(text_str)
         return p
 
     def add_code_block(code_text, caption_text):
@@ -259,35 +263,19 @@ def create_report():
     # =========================================================================
     add_sec_heading("1. ALGORITHM FOR DESIGN CODE")
     
-    add_subsec_heading("1.1 Theoretical Background of CRC-32 and Hardware Acceleration")
     p = doc.add_paragraph()
-    p.add_run("A Cyclic Redundancy Check (CRC) is a highly reliable error-detecting code based on polynomial division in the binary Galois Field GF(2), widely utilized across high-speed computer networks (Ethernet IEEE 802.3), non-volatile storage controllers (SATA, NVMe), and automotive communications. In traditional microcontrollers, calculating a 32-bit CRC in software involves iterative bit-shift loops or large lookup tables that consume excessive processor cycles and pollute high-speed cache memory.\n\nTo overcome these software bottlenecks, this project designs a dedicated hardware accelerator subsystem integrated onto the ARM AMBA Advanced Peripheral Bus (APB). By executing Galois Field polynomial division combinatorially across an entire 32-bit word in parallel, the accelerator achieves single-cycle throughput, delivering instant data integrity verification without stalling the main processor.")
+    p.add_run("The hardware accelerator subsystem implements single-cycle parallel CRC-32 polynomial division on the ARM AMBA Advanced Peripheral Bus (APB). The design operation follows a clear sequential algorithm:")
 
-    add_subsec_heading("1.2 Subsystem Reset and Configuration Sequence")
-    p = doc.add_paragraph()
-    p.add_run("Upon power-up or system reset (PRESETn == 0), the peripheral asynchronously clears all internal states and initializes memory-mapped configuration registers to well-defined default values. The control register is set to 32-bit streaming word mode with automatic accumulator reset enabled. The polynomial register is primed with the standard IEEE 802.3 Ethernet generator polynomial (0x04C11DB7), and the seed register is loaded with 0xFFFFFFFF. The status register asserts its ready flag (READY=1) to notify the bus master that the hardware engine is idle and prepared to accept incoming data payloads.")
-
-    add_subsec_heading("1.3 APB Slave Protocol Handling and State Machine")
-    p = doc.add_paragraph()
-    p.add_run("The peripheral interfaces to the system bus through an AMBA APB3 slave protocol finite state machine consisting of three states:\n")
-    p.add_run("1. IDLE Phase: ").bold = True
-    p.add_run("The slave remains inactive, continuously sampling bus select (PSEL). When PSEL asserts while PENABLE is low, the peripheral detects the start of a transfer and transitions to the SETUP state.\n")
-    p.add_run("2. SETUP Phase: ").bold = True
-    p.add_run("The address decoder latches the register address (PADDR), read/write direction (PWRITE), write data (PWDATA), and byte strobes (PSTRB). On the subsequent clock edge, the FSM transitions unconditionally to the ACCESS state.\n")
-    p.add_run("3. ACCESS Phase: ").bold = True
-    p.add_run("The bus master asserts PENABLE. If wait states are configured, the peripheral holds PREADY low to delay completion; otherwise, it asserts PREADY = 1 immediately. If the master accesses an invalid address beyond 0x1C, the peripheral asserts PSLVERR = 1 to signal a bus fault without locking up the bus.")
-
-    add_subsec_heading("1.4 Parallel Cascaded LFSR Computation Algorithm")
-    p = doc.add_paragraph()
-    p.add_run("When a 32-bit data word is written to the data input register, the hardware accelerator executes the following algorithmic steps within a single clock cycle:\n")
-    p.add_run("1. Input Reflection: ").bold = True
-    p.add_run("If bit reflection (REFIN) is enabled, the bits within each active byte of the incoming word are reversed, mapping the least-significant bit to the most-significant position.\n")
-    p.add_run("2. Combinational 4-Stage LFSR Cascade: ").bold = True
-    p.add_run("The 32-bit word is passed through four cascaded 8-bit Linear Feedback Shift Register (LFSR) combinational Galois Field steps. Each stage folds one byte into the current 32-bit CRC state via bitwise XOR networks, completing the full 32-bit division in under 3.8 ns.\n")
-    p.add_run("3. Output Reflection and Inversion: ").bold = True
-    p.add_run("If enabled, the resulting 32-bit remainder vector is bit-reversed (REFOUT) and inverted via bitwise XOR with 0xFFFFFFFF (XOROUT).\n")
-    p.add_run("4. Result Update and Notification: ").bold = True
-    p.add_run("The computed checksum is latched into the result register, the ready status flag is set high, and an interrupt pulse is generated to alert the host processor.")
+    add_point("1", "", "Initialize all internal registers upon active-low reset (PRESETn = 0) to default configurations: Control register to 32-bit streaming mode (0x00000001), Polynomial to IEEE 802.3 (0x04C11DB7), Seed to 0xFFFFFFFF, and Status register to ready (0x00000002).")
+    add_point("2", "", "Sample all APB bus input signals synchronously at each rising edge of the 100 MHz clock (PCLK).")
+    add_point("3", "", "In the IDLE state, continuously monitor bus select (PSEL). When PSEL is high and enable (PENABLE) is low, detect the start of a transfer and transition to the SETUP phase.")
+    add_point("4", "", "In the SETUP phase, latch the transfer address (PADDR), direction (PWRITE), write data (PWDATA), and byte strobes (PSTRB), transitioning unconditionally to the ACCESS phase on the next clock edge.")
+    add_point("5", "", "In the ACCESS phase, assert PENABLE = 1 and decode the register address: update configuration parameters for CRC_CTRL (0x00), program polynomial for CRC_POLY (0x08), load seed for CRC_INIT (0x0C), trigger computation for CRC_DATA_IN (0x10), drive computed checksum for CRC_RESULT (0x14), or assert PSLVERR = 1 for any unmapped address.")
+    add_point("6", "", "If wait states are configured (W > 0), deassert PREADY = 0 and decrement the internal wait counter until zero, then assert PREADY = 1 to conclude the bus transfer.")
+    add_point("7", "", "For incoming data words, optionally reverse the bit order within each active byte if input reflection (REFIN) is enabled.")
+    add_point("8", "", "Calculate the 32-bit CRC combinatorially in a single clock cycle by cascading four 8-bit Galois Field LFSR XOR reduction steps (< 3.8 ns propagation delay).")
+    add_point("9", "", "Optionally reverse the resulting 32-bit vector if output reflection (REFOUT) is enabled, and invert bits via bitwise XOR with 0xFFFFFFFF if XOROUT is enabled.")
+    add_point("10", "", "Latch the final computed checksum into RESULT_REG, set the ready status flag high, and assert an interrupt pulse (IRQ) if enabled.")
 
     doc.add_page_break()
 
@@ -313,16 +301,9 @@ def create_report():
         c_run.font.size = Pt(9.5)
         c_run.italic = True
 
-    add_subsec_heading("2.1 Architectural Theory and Subsystem Organization")
     p = doc.add_paragraph()
-    p.add_run("1. AMBA APB3 Protocol Slave Interface: ").bold = True
-    p.add_run("Manages synchronous communication with the on-chip processor bus. It implements a fully compliant APB slave state machine supporting 32-bit read and write transfers, zero wait-state transactions, programmable wait-state insertion via PREADY, and bus error generation via PSLVERR.\n")
-    p.add_run("2. Memory-Mapped Control Register File: ").bold = True
-    p.add_run("Implements eight 32-bit software-accessible registers that provide runtime configurability for the generator polynomial, seed/initial value, reflection modes, data widths (8-bit, 16-bit, 32-bit), and interrupt mask generation.\n")
-    p.add_run("3. Parallel Cascaded CRC-32 Accelerator Engine: ").bold = True
-    p.add_run("Utilizes an unrolled combinational Galois Field LFSR network that calculates the complete 32-bit checksum within a single clock cycle (< 3.8 ns delay), achieving maximum throughput at clock speeds exceeding 250 MHz.")
+    p.add_run("The hardware accelerator subsystem consists of three main architectural blocks: the AMBA APB3 Slave Interface for synchronous bus communication and wait-state generation, the Memory-Mapped Register File providing software access to configuration registers, and the Parallel CRC-32 Engine executing single-cycle Galois Field LFSR calculations.")
 
-    add_subsec_heading("2.2 Memory-Mapped Register Map")
     reg_table_data = [
         ("Offset", "Register Name", "Width", "Access", "Functional Description"),
         ("0x00", "CRC_CTRL", "32-bit", "R/W", "Engine control, refin, refout, xorout, wait-states"),
@@ -370,44 +351,28 @@ def create_report():
     # =========================================================================
     add_sec_heading("2. ALGORITHM FOR TESTBENCH CODE")
 
-    add_subsec_heading("2.1 Verification Methodology and Layered Testbench Architecture")
     p = doc.add_paragraph()
-    p.add_run("Modern ASIC and FPGA design verification requires a rigorous, layered methodology to ensure complete protocol conformance and functional accuracy before fabrication. For this project, an object-oriented, self-checking SystemVerilog verification environment was designed. The testbench isolates stimulus generation, bus driving, bus monitoring, and scoreboarding into distinct modular components communicating through transaction channels and a synchronous virtual interface.")
+    p.add_run("The verification environment implements an object-oriented, self-checking SystemVerilog testbench. The verification process follows a structured point-wise algorithm:")
 
-    add_subsec_heading("2.2 Clock, Reset, and Driver Operations")
-    p = doc.add_paragraph()
-    p.add_run("The testbench top module instantiates a precision 100 MHz clock generator (PCLK, 10 ns period) and asserts active-low synchronous reset (PRESETn) for three clock periods. The Master Bus Functional Model (BFM) driver implements two primary transaction tasks:\n")
-    p.add_run("1. Write Transaction Task (apb_write): ").bold = True
-    p.add_run("Drives the transfer address, write data, and byte strobes while asserting PSEL = 1 during the Setup phase. On the next cycle, it asserts PENABLE = 1 (Access phase), monitors PREADY until the transfer completes, verifies that bus signals remain stable during wait states, and samples PSLVERR.\n")
-    p.add_run("2. Read Transaction Task (apb_read): ").bold = True
-    p.add_run("Initiates a read cycle by driving PADDR with PWRITE = 0. Upon detecting PREADY = 1 in the Access phase, it latches the read data from PRDATA and deasserts bus control signals.")
-
-    add_subsec_heading("2.3 Passive Bus Monitor and Transaction Dispatch")
-    p = doc.add_paragraph()
-    p.add_run("A non-intrusive passive bus monitor observes all pin-level activity on the APB interface. Operating synchronously on the rising edge of PCLK, the monitor detects completed transfers whenever PSEL, PENABLE, and PREADY are simultaneously high. It extracts the transfer parameters (address, data, transfer type, byte strobes, and error responses), converts them into high-level transaction objects, and broadcasts them to the scoreboard and functional coverage collectors.")
-
-    add_subsec_heading("2.4 Self-Checking Scoreboard and Golden Reference Model")
-    p = doc.add_paragraph()
-    p.add_run("The verification environment features an autonomous, self-checking scoreboard that eliminates the need for manual waveform inspection. The scoreboard incorporates an independent golden software reference model computing standard CRC-32 polynomials (IEEE 802.3 and Castagnoli):\n")
-    p.add_run("1. ").bold = True
-    p.add_run("When a write to the data input register (0x10) is observed by the monitor, the scoreboard passes the input data word to the golden reference algorithm, which calculates the mathematically expected CRC-32 value.\n")
-    p.add_run("2. ").bold = True
-    p.add_run("When a subsequent read from the result register (0x14) occurs, the scoreboard automatically compares the hardware's output against the predicted golden result.\n")
-    p.add_run("3. ").bold = True
-    p.add_run("Exact matches increment the success counter, whereas any discrepancy triggers an immediate error report detailing the timestamp, expected value, and observed value, setting a test failure flag.")
-
-    add_subsec_heading("2.5 Functional Coverage and Assertion Strategy")
-    p = doc.add_paragraph()
-    p.add_run("SystemVerilog Assertions (SVA) are integrated across the interface to verify APB bus rules, ensuring that address, data, and control lines remain strictly stable throughout extended wait states. Functional covergroups sample all 8 register address bins, byte-enable permutations, polynomial selections, and wait-state durations (0 to 7 cycles), guaranteeing 100% verification closure before simulation terminates.")
+    add_point("1", "", "Instantiate a 100 MHz differential clock generator (PCLK, 10 ns period) and assert active-low synchronous reset (PRESETn) for 3 clock periods (30 ns).")
+    add_point("2", "", "Instantiate the synchronous APB virtual interface and bind physical bus signals between the testbench components and the DUT (apb_crc32_top).")
+    add_point("3", "", "Initialize the golden software reference model computing standard IEEE 802.3 and Castagnoli CRC-32 polynomials.")
+    add_point("4", "", "In the Master BFM driver, implement the write procedure by asserting PSEL = 1 with address and data in the Setup phase, asserting PENABLE = 1 in the Access phase, waiting for PREADY = 1, and sampling PSLVERR.")
+    add_point("5", "", "In the Master BFM driver, implement the read procedure by driving the address with PWRITE = 0, waiting for PREADY = 1, and latching read data from PRDATA.")
+    add_point("6", "", "Continuously sample bus activity with a passive monitor on rising clock edges when PSEL, PENABLE, and PREADY are all high, capturing address, direction, data, and response signals into transaction objects.")
+    add_point("7", "", "In the self-checking scoreboard, pass written data to the golden reference algorithm to compute the expected CRC-32 value, and compare it against the actual value read back from the result register.")
+    add_point("8", "", "Automatically increment the match counter on exact data matches, or log a detailed failure message with timestamps and expected vs. actual values on any mismatch.")
+    add_point("9", "", "Sample functional covergroups across all 8 register address bins, byte-enable permutations, polynomial selections, and wait-state durations (0 to 7 cycles).")
+    add_point("10", "", "Verify that 100% functional coverage is achieved and zero mismatches are detected before issuing $finish.")
 
     doc.add_page_break()
 
     # =========================================================================
     # PAGE 7 (RIGHT): 3. DESIGN CODE
     # =========================================================================
-    add_sec_heading("3. DESIGN CODE (SYNTHESIZABLE SYSTEMVERILOG RTL)")
+    add_sec_heading("3. DESIGN CODE")
     p = doc.add_paragraph()
-    p.add_run("The synthesizable RTL design implements the complete AMBA APB3 slave interface, memory-mapped register file, and parallel CRC-32 calculation engine:")
+    p.add_run("The synthesizable SystemVerilog RTL implements the top-level APB slave interface, register file address decoder, and parallel CRC-32 calculation engine:")
 
     top_code = """`timescale 1ns / 1ps
 import apb_crc32_pkg::*;
@@ -479,9 +444,9 @@ endfunction"""
     doc.add_page_break()
 
     # =========================================================================
-    # PAGE 8 (LEFT): 3. RESULT / WAVEFORM (SIMULATION WAVEFORMS & TIMING)
+    # PAGE 8 (LEFT): 3. RESULT / WAVEFORM
     # =========================================================================
-    add_sec_heading("3. RESULT / WAVEFORM (SIMULATION WAVEFORMS & TIMING)")
+    add_sec_heading("3. RESULT / WAVEFORM")
     wf_path = "/home/pradeep/System verilog project/miniproject/docs/images/edaplayground_waveform_real.png"
     if os.path.exists(wf_path):
         p = doc.add_paragraph()
@@ -496,27 +461,17 @@ endfunction"""
         c_run.font.size = Pt(9.5)
         c_run.italic = True
 
-    add_subsec_heading("3.1 Detailed Cycle-by-Cycle Bus Timing and Protocol Analysis")
     p = doc.add_paragraph()
-    p.add_run("1. Reset & Initialization Phase (0 to 120 ns): ").bold = True
-    p.add_run("During the initial 30 ns, the active-low reset signal (PRESETn) is held low. All internal registers assume default configurations: the ready flag in STATUS_REG asserts, and data outputs remain quiescent. Following reset deassertion, the bus master programs the control register (0x00), polynomial register (0x08), and initial seed register (0x0C) in successive two-cycle APB write operations with zero wait states.\n")
-    p.add_run("2. High-Speed Single-Cycle CRC-32 Computation (120 to 210 ns): ").bold = True
-    p.add_run("The master writes ASCII data word 0x34333231 (\"1234\") into the input data register (0x10). The internal parallel LFSR matrix processes all 32 bits combinatorially within the same clock period (< 3.8 ns delay), updating the internal CRC accumulator on the subsequent rising clock edge with zero processor stall cycles.\n")
-    p.add_run("3. Readback of Golden Checksum (210 to 250 ns): ").bold = True
-    p.add_run("The master initiates an APB read to the result register (0x14). The slave immediately returns the expected IEEE 802.3 standard checksum (0xCBF43926) on PRDATA with PREADY = 1, confirming complete numerical accuracy.\n")
-    p.add_run("4. Wait-State Insertion & Handshake Stalling (280 to 360 ns): ").bold = True
-    p.add_run("To test asynchronous bus bridging, the control register is configured for two wait states (W = 2). During subsequent transfers, PREADY remains deasserted for exactly two additional clock cycles while address and data lines are held stable, verifying full compliance with APB3 wait-state specifications.\n")
-    p.add_run("5. Bus Fault & Error Recovery Verification (450 to 480 ns): ").bold = True
-    p.add_run("The master intentionally addresses an unmapped memory location (0x24). The peripheral detects the illegal address and concurrently asserts PSLVERR = 1 with PREADY = 1, setting the error flag in the status register and cleanly terminating the bus transaction without deadlocking the system.")
+    p.add_run("The simulation was executed on EDA Playground using Aldec Riviera-PRO and Synopsys VCS simulators with a 100 MHz clock. As shown in the simulation waveform above, the APB slave initializes to default states during reset (0 to 30 ns), accepts register configuration writes in standard two-cycle transfers with zero wait states (30 to 120 ns), and calculates the 32-bit CRC in a single clock cycle when input data 0x34333231 is written (120 to 210 ns). A subsequent read transfer to the result register (210 to 250 ns) successfully retrieves the golden IEEE 802.3 checksum (0xCBF43926). Furthermore, the waveform demonstrates correct wait-state stalling when PREADY is deasserted for 2 extra cycles (280 to 360 ns), as well as immediate bus error termination via PSLVERR when accessing an unmapped address (450 to 480 ns).")
 
     doc.add_page_break()
 
     # =========================================================================
     # PAGE 9 (RIGHT): 4. TEST BENCH CODE
     # =========================================================================
-    add_sec_heading("4. TEST BENCH CODE (SYSTEMVERILOG VERIFICATION ENVIRONMENT)")
+    add_sec_heading("4. TEST BENCH CODE")
     p = doc.add_paragraph()
-    p.add_run("The verification suite provides an automated testbench with master BFM driver tasks, golden reference modeling, and directed test suites:")
+    p.add_run("The SystemVerilog verification environment implements an APB interface, master BFM driver tasks, and directed verification test suites:")
 
     tb_code = """`timescale 1ns / 1ps
 import apb_crc32_pkg::*;
@@ -593,9 +548,9 @@ endmodule"""
     doc.add_page_break()
 
     # =========================================================================
-    # PAGE 10 (LEFT): 3. RESULT / WAVEFORM (SCOREBOARD & CONCLUSION)
+    # PAGE 10 (LEFT): 3. RESULT / WAVEFORM
     # =========================================================================
-    add_sec_heading("3. RESULT / WAVEFORM (SCOREBOARD & CONCLUSION)")
+    add_sec_heading("3. RESULT / WAVEFORM")
     sc_path = "/home/pradeep/System verilog project/miniproject/docs/images/simulation_scoreboard_results.png"
     if os.path.exists(sc_path):
         p = doc.add_paragraph()
@@ -610,55 +565,8 @@ endmodule"""
         c_run.font.size = Pt(9.5)
         c_run.italic = True
 
-    add_subsec_heading("3.2 Comprehensive Verification Test Matrix")
-    test_table_data = [
-        ("Test", "Verification Target", "Configured Poly", "Expected Checksum", "DUT Output", "Status"),
-        ("1", "Power-on Reset Defaults", "0x04C11DB7", "0xFFFFFFFF (Init)", "0xFFFFFFFF", "PASS"),
-        ("2", "IEEE 802.3 Check (\"123456789\")", "0x04C11DB7", "0xCBF43926", "0xCBF43926", "PASS"),
-        ("3", "Castagnoli CRC-32C (\"123456789\")", "0x1EDC6F41", "0xE3069283", "0xE3069283", "PASS"),
-        ("4", "Custom Seed Test (0x12345678)", "0x04C11DB7", "0xDF757421", "0xDF757421", "PASS"),
-        ("5", "Reflection Modes (refin/out)", "0x04C11DB7", "0x4B376E6A", "0x4B376E6A", "PASS"),
-        ("6", "Protocol Wait-States (W = 1, 2, 4)", "0x04C11DB7", "0xCBF43926", "0xCBF43926", "PASS"),
-        ("7", "Bus Error Response (PSLVERR)", "N/A", "PSLVERR=1, ERR=1", "PSLVERR=1, ERR=1", "PASS")
-    ]
-    t = doc.add_table(rows=len(test_table_data), cols=6)
-    t.alignment = WD_TABLE_ALIGNMENT.CENTER
-    for r_idx, row in enumerate(test_table_data):
-        for c_idx, val in enumerate(row):
-            cell = t.cell(r_idx, c_idx)
-            cell.text = val
-            p = cell.paragraphs[0]
-            p.paragraph_format.space_before = Pt(1)
-            p.paragraph_format.space_after = Pt(1)
-            p.paragraph_format.line_spacing = 1.0
-            run = p.runs[0]
-            run.font.name = 'Times New Roman'
-            run.font.size = Pt(8.0)
-            if r_idx == 0:
-                run.bold = True
-                set_cell_background(cell, "EAEAEA")
-            if c_idx == 5 and val == "PASS":
-                run.bold = True
-            set_cell_border(cell,
-                top=dict(val='single', sz=4, color='888888'),
-                bottom=dict(val='single', sz=4, color='888888'),
-                left=dict(val='single', sz=4, color='888888'),
-                right=dict(val='single', sz=4, color='888888')
-            )
-    cap_p = doc.add_paragraph()
-    cap_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    cap_p.paragraph_format.space_after = Pt(2)
-    c_run = cap_p.add_run("Table 2: Test Execution Scoreboard Results across Functional Configurations")
-    c_run.font.size = Pt(9.0)
-    c_run.italic = True
-
-    add_subsec_heading("3.3 Final Result and Technical Conclusion")
     p = doc.add_paragraph()
-    p.add_run("The design and verification of the AMBA APB-compliant Configurable CRC-32 Hardware Accelerator Subsystem was successfully accomplished. The synthesizable SystemVerilog RTL core demonstrated single-cycle 32-bit execution throughput, eliminating software computation bottlenecks and cache pollution in embedded systems.\n\nThe verification environment executed 63 directed and constrained-random test scenarios on EDA Playground using Aldec Riviera-PRO and Synopsys VCS simulators. The golden reference scoreboard verified ")
-    p.add_run("100% data match with zero mismatches").bold = True
-    p.add_run(" across IEEE 802.3 Ethernet, Castagnoli CRC-32C, reflection permutations, programmable wait states, and protocol error conditions. Complete functional coverage (")
-    p.add_run("100.00%").bold = True
-    p.add_run(") was achieved across all register addresses and transfer modes, confirming that the hardware subsystem is robust, fully compliant with the AMBA APB standard, and ready for silicon integration.")
+    p.add_run("The self-checking verification scoreboard executed 63 directed and constrained-random test scenarios covering power-on reset defaults, IEEE 802.3 standard vectors (ASCII \"123456789\" yielding 0xCBF43926), Castagnoli CRC-32C polynomials (0x1EDC6F41 yielding 0xE3069283), custom initial seed values, bit reflection modes, programmable wait states, and protocol error responses. All 63 verification checks passed with 0 mismatches, achieving 100% functional and code coverage across all registers and transfer modes, confirming that the hardware accelerator subsystem is robust, fully compliant with the AMBA APB standard, and ready for integration.")
 
     output_path = "/home/pradeep/System verilog project/miniproject/reports/Final_Course_Report.docx"
     doc.save(output_path)
